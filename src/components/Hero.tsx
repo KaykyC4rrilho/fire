@@ -1,4 +1,4 @@
-import heroBackground from '../assets/hero.png'
+import heroBackground from '../assets/hero.webp'
 import fireArtwork from '../assets/FIRE.svg'
 
 const MOVEMENT_LETTERS = 'MOVIMENTO'.split('')
