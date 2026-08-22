@@ -1,35 +1,55 @@
-import heroBackground from './assets/hero.png'
-import fireIcon from './assets/iconfire.png'
-import './App.css'
+import { lazy, Suspense, useEffect, useState } from 'react'
+import Hero from './components/Hero'
+import Preloader from './components/Preloader'
+
+const PRELOADER_DURATION = 6000
+const TRANSITION_DURATION = 900
+const FireSphereSection = lazy(() => import('./components/FireSphereSection'))
 
 function App() {
-  return (
-    <main>
-      <section
-        className="hero"
-        aria-labelledby="hero-title"
-        style={{ backgroundImage: `url(${heroBackground})` }}
-      >
-        <div className="hero__content">
-          <p className="hero__eyebrow">MOVIMENTO</p>
+  const [showPreloader, setShowPreloader] = useState(true)
+  const [isTransitioning, setIsTransitioning] = useState(false)
 
-          <h1 id="hero-title" className="hero__title" aria-label="FIRE">
-            <span className="hero__letters" aria-hidden="true">
-              <span className="hero__letter hero__letter--f">F</span>
-              <span className="hero__letter hero__letter--i">I</span>
-              <img
-                className="hero__fire"
-                src={fireIcon}
-                width="1254"
-                height="1254"
-                alt=""
-              />
-              <span className="hero__letter hero__letter--r">R</span>
-              <span className="hero__letter hero__letter--e">E</span>
-            </span>
-          </h1>
+  useEffect(() => {
+    const transitionTimeout = window.setTimeout(() => {
+      setIsTransitioning(true)
+    }, PRELOADER_DURATION)
+
+    const removeTimeout = window.setTimeout(() => {
+      setShowPreloader(false)
+    }, PRELOADER_DURATION + TRANSITION_DURATION)
+
+    return () => {
+      window.clearTimeout(transitionTimeout)
+      window.clearTimeout(removeTimeout)
+    }
+  }, [])
+
+  return (
+    <main className="relative bg-charcoal">
+      <div
+        className={`transition-opacity duration-1000 ease-out ${
+          isTransitioning || !showPreloader ? 'opacity-100' : 'opacity-0'
+        }`}
+      >
+        <Hero />
+        {!showPreloader && (
+          <Suspense fallback={null}>
+            <FireSphereSection />
+          </Suspense>
+        )}
+      </div>
+
+      {showPreloader && (
+        <div
+          className={`fixed inset-0 z-50 transition-opacity duration-[900ms] ease-in-out ${
+            isTransitioning ? 'pointer-events-none opacity-0' : 'opacity-100'
+          }`}
+          aria-hidden={isTransitioning}
+        >
+          <Preloader />
         </div>
-      </section>
+      )}
     </main>
   )
 }
