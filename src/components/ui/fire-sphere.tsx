@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { type CSSProperties, useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js'
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js'
@@ -20,6 +20,7 @@ const frag = `
   uniform vec3 color1;
   uniform vec3 color0;
   uniform float time;
+  uniform float fillProgress;
   varying vec3 vNormal;
 
   float rand(vec2 n) { return fract(sin(dot(n, vec2(12.9898, 4.1414))) * 43758.5453); }
@@ -51,7 +52,7 @@ const frag = `
 
   float setOpacity(float r, float g, float b) {
     float tone = (r + g + b) / 3.0;
-    return tone < 0.99 ? 0.0 : 1.0;
+    return smoothstep(0.975, 1.0, tone);
   }
 
   void main(){
@@ -72,7 +73,11 @@ const frag = `
     // edge
     frontColor.a = frontColor.a - backColor.a;
 
-    gl_FragColor = frontColor.a > 0.0 ? frontColor : backColor;
+    vec4 sphereColor = frontColor.a > 0.0 ? frontColor : backColor;
+    sphereColor.rgb = mix(sphereColor.rgb, rgbcol(color1.r, color1.g, color1.b), fillProgress);
+    sphereColor.a = max(sphereColor.a, fillProgress);
+
+    gl_FragColor = sphereColor;
   }
 `
 
@@ -91,10 +96,18 @@ export type FireSphereProps = {
   animate?: boolean
   /** Max renderer pixel ratio (default 1.25) */
   maxPixelRatio?: number
+  /** Whether to use antialiasing (default false) */
+  antialias?: boolean
   /** Sphere segment count (default 32) */
   segments?: number
+  /** Internal solid fill progress, 0-1 (default 0) */
+  fillProgress?: number
+  /** Canvas background fill progress, 0-1 (default 0) */
+  canvasFillProgress?: number
   /** Optional extra classes for the wrapper */
   className?: string
+  /** Optional inline styles for the wrapper */
+  style?: CSSProperties
 }
 
 function FireSphere({
@@ -105,8 +118,12 @@ function FireSphere({
   color1 = [201, 158, 72],
   animate = true,
   maxPixelRatio = 1.25,
+  antialias = false,
   segments = 32,
+  fillProgress = 0,
+  canvasFillProgress = 0,
   className = '',
+  style,
 }: FireSphereProps) {
   const mountRef = useRef<HTMLDivElement | null>(null)
   const apiRef = useRef<{
@@ -115,6 +132,7 @@ function FireSphere({
       resolution: { value: THREE.Vector4 }
       color1: { value: THREE.Vector3 }
       color0: { value: THREE.Vector3 }
+      fillProgress: { value: number }
     }
     bloomPass?: UnrealBloomPass
     renderer?: THREE.WebGLRenderer
@@ -140,11 +158,12 @@ function FireSphere({
 
     const renderer = new THREE.WebGLRenderer({
       alpha: true,
-      antialias: false,
+      antialias,
       powerPreference: 'low-power',
     })
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, maxPixelRatio))
     renderer.setSize(width, height)
+    renderer.setClearColor(new THREE.Color(color1[0] / 255, color1[1] / 255, color1[2] / 255), canvasFillProgress)
     mountRef.current.appendChild(renderer.domElement)
 
     const composer = shouldUseBloom ? new EffectComposer(renderer) : undefined
@@ -162,6 +181,7 @@ function FireSphere({
       resolution: { value: new THREE.Vector4(width, height, 1, 1) },
       color1: { value: new THREE.Vector3(...color1) },
       color0: { value: new THREE.Vector3(...color0) },
+      fillProgress: { value: fillProgress },
     }
 
     const geometry = new THREE.SphereGeometry(1.7, segments, segments)
@@ -242,6 +262,23 @@ function FireSphere({
 
   useEffect(() => {
     const api = apiRef.current
+    if (!api.uniforms) return
+
+    api.uniforms.fillProgress.value = fillProgress
+  }, [fillProgress])
+
+  useEffect(() => {
+    const api = apiRef.current
+    if (!api.renderer) return
+
+    api.renderer.setClearColor(
+      new THREE.Color(color1[0] / 255, color1[1] / 255, color1[2] / 255),
+      canvasFillProgress,
+    )
+  }, [canvasFillProgress, color1])
+
+  useEffect(() => {
+    const api = apiRef.current
     if (!api.bloomPass) return
 
     api.bloomPass.threshold = bloomThreshold
@@ -250,7 +287,7 @@ function FireSphere({
   }, [bloomStrength, bloomRadius, bloomThreshold])
 
   return (
-    <div className={`relative h-full w-full ${className}`}>
+    <div className={`relative h-full w-full ${className}`} style={style}>
       <div ref={mountRef} className="absolute inset-0" />
     </div>
   )
