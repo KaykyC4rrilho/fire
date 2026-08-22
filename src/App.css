@@ -1,0 +1,126 @@
+.hero {
+  position: relative;
+  display: grid;
+  min-height: 100svh;
+  width: 100%;
+  place-items: center;
+  overflow: hidden;
+  isolation: isolate;
+  background-color: #29120c;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.hero__content {
+  display: flex;
+  width: min(92vw, 52rem);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(2rem, 5vh, 4rem) 0 0;
+  transform: translateY(clamp(1rem, 3.8vh, 2.75rem));
+  color: #f2efe3;
+  text-align: center;
+}
+
+.hero__eyebrow {
+  position: relative;
+  z-index: 2;
+  margin: 0 0 clamp(2rem, 6vh, 4.75rem);
+  padding-left: 0.7em;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: clamp(0.72rem, 1.25vw, 1.22rem);
+  font-weight: 300;
+  line-height: 1;
+  letter-spacing: clamp(0.42em, 1vw, 0.72em);
+  color: #f2efe3;
+}
+
+.hero__title {
+  position: relative;
+  display: grid;
+  width: fit-content;
+  margin: 0;
+  place-items: center;
+  line-height: 0.78;
+  color: #f2efe3;
+  white-space: nowrap;
+}
+
+.hero__letters {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  gap: 0;
+  font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  font-size: clamp(10.5rem, 21vw, 24rem);
+  font-style: normal;
+  font-weight: 400;
+  letter-spacing: 0;
+  transform: scaleX(0.64);
+  transform-origin: center;
+}
+
+.hero__letter {
+  position: relative;
+  display: block;
+}
+
+.hero__letter--f {
+  z-index: 2;
+  transform: skewX(-3deg) scaleX(0.82);
+  transform-origin: right bottom;
+}
+
+.hero__letter--i {
+  z-index: 0;
+  margin-inline: -0.04em;
+  transform: skewX(-3deg) scaleX(0.7);
+  transform-origin: center bottom;
+}
+
+.hero__letter--r,
+.hero__letter--e {
+  z-index: 2;
+  transform: skewX(-12deg);
+  transform-origin: center bottom;
+}
+
+.hero__fire {
+  position: absolute;
+  z-index: 1;
+  top: -10%;
+  left: 40%;
+  width: clamp(7rem, 8.3vw, 10rem);
+  height: auto;
+  transform: translateX(-50%) scaleX(1.5625);
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+}
+
+@media (max-aspect-ratio: 3 / 4) {
+  .hero {
+    background-position: center center;
+  }
+
+  .hero__content {
+    width: 96vw;
+    padding-top: 1rem;
+    transform: none;
+  }
+
+  .hero__eyebrow {
+    margin-bottom: clamp(1.25rem, 3vh, 1.75rem);
+  }
+
+  .hero__letters {
+    font-size: clamp(9.6rem, 53vw, 14rem);
+  }
+
+  .hero__fire {
+    top: -9%;
+    width: clamp(4.75rem, 20vw, 6.5rem);
+  }
+}
