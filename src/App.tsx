@@ -1,16 +1,32 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
 import Hero from './components/Hero'
+import LeadFormScreen from './components/LeadFormScreen'
 import Preloader from './components/Preloader'
 
 const PRELOADER_DURATION = 6000
 const TRANSITION_DURATION = 900
 const FireSphereSection = lazy(() => import('./components/FireSphereSection'))
 
+const isConferenceEntry = () =>
+  new URLSearchParams(window.location.search).get('conferencia') ===
+  'sobretodaacarne'
+
+const isParticipationEntry = () =>
+  window.location.pathname.replace(/\/+$/, '') === '/participar'
+
+const shouldShowLeadForm = () =>
+  isConferenceEntry() || isParticipationEntry()
+
 function App() {
+  const [hasEnteredExperience, setHasEnteredExperience] = useState(
+    () => !shouldShowLeadForm(),
+  )
   const [showPreloader, setShowPreloader] = useState(true)
   const [isTransitioning, setIsTransitioning] = useState(false)
 
   useEffect(() => {
+    if (!hasEnteredExperience) return
+
     const transitionTimeout = window.setTimeout(() => {
       setIsTransitioning(true)
     }, PRELOADER_DURATION)
@@ -23,7 +39,13 @@ function App() {
       window.clearTimeout(transitionTimeout)
       window.clearTimeout(removeTimeout)
     }
-  }, [])
+  }, [hasEnteredExperience])
+
+  if (!hasEnteredExperience) {
+    return (
+      <LeadFormScreen onContinue={() => setHasEnteredExperience(true)} />
+    )
+  }
 
   return (
     <main className="relative bg-charcoal">

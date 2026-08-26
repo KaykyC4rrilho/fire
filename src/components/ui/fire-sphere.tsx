@@ -212,6 +212,8 @@ export type FireSphereProps = {
   canvasFillProgress?: number
   /** Organic shader-driven section consumption progress, 0-1 (default 0) */
   consumeProgress?: number
+  /** Normalized origin of the consumption effect, with Y measured from the bottom */
+  consumeOrigin?: [number, number]
   /** Whether the original animated sphere mesh is rendered (default true) */
   showSphere?: boolean
   /** Optional extra classes for the wrapper */
@@ -233,6 +235,7 @@ function FireSphere({
   fillProgress = 0,
   canvasFillProgress = 0,
   consumeProgress = 0,
+  consumeOrigin,
   showSphere = true,
   className = '',
   style,
@@ -336,10 +339,14 @@ function FireSphere({
 
       mesh.position.x = showSphere ? 0 : isMobile ? 0 : visibleHalfWidth * 0.5
       mesh.position.y = showSphere ? 0 : isMobile ? -visibleHalfHeight * 0.58 : -visibleHalfHeight * 0.08
-      uniforms.sphereCenter.value.set(
-        isMobile ? 0.5 : 0.75,
-        isMobile ? 0.21 : 0.46,
-      )
+      if (consumeOrigin) {
+        uniforms.sphereCenter.value.set(...consumeOrigin)
+      } else {
+        uniforms.sphereCenter.value.set(
+          isMobile ? 0.5 : 0.75,
+          isMobile ? 0.21 : 0.46,
+        )
+      }
     }
 
     positionSphere()
