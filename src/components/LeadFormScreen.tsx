@@ -1,11 +1,13 @@
 import fireArtwork from '../assets/FIRE.svg'
-import LeadForm, { type LeadFormData } from './LeadForm'
+import type { LeadSource, LeadSubmissionData } from '../types/lead'
+import LeadForm from './LeadForm'
 
 type LeadFormScreenProps = {
-  onContinue: (data: LeadFormData) => void
+  source: LeadSource
+  onContinue: (data: LeadSubmissionData) => void
 }
 
-function LeadFormScreen({ onContinue }: LeadFormScreenProps) {
+function LeadFormScreen({ source, onContinue }: LeadFormScreenProps) {
   return (
     <main className="relative min-h-[100svh] overflow-hidden bg-black text-cream">
       <div
@@ -46,7 +48,9 @@ function LeadFormScreen({ onContinue }: LeadFormScreenProps) {
         </section>
 
         <section className="flex items-center px-6 py-12 sm:px-10 lg:px-14 xl:px-20">
-          <LeadForm onSubmit={onContinue} />
+          <LeadForm
+            onSubmit={(data) => onContinue({ ...data, ...source })}
+          />
         </section>
       </div>
     </main>

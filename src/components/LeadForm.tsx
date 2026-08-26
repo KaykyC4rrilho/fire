@@ -1,37 +1,37 @@
 import { type FormEvent, useState } from 'react'
-
-export type LeadFormData = {
-  name: string
-  phone: string
-  isChristian: 'sim' | 'nao'
-}
+import { formatPhone } from '../lib/phone'
+import type { LeadFormData } from '../types/lead'
 
 type LeadFormProps = {
-  onSubmit: (data: LeadFormData) => void
+  onSubmit: (data: LeadFormData) => void | Promise<void>
   buttonLabel?: string
-}
-
-function formatPhone(value: string) {
-  const digits = value.replace(/\D/g, '').slice(0, 11)
-
-  if (digits.length <= 2) return digits ? `(${digits}` : ''
-  if (digits.length <= 7) {
-    return `(${digits.slice(0, 2)}) ${digits.slice(2)}`
-  }
-
-  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`
 }
 
 function LeadForm({ onSubmit, buttonLabel = 'Continuar' }: LeadFormProps) {
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [isChristian, setIsChristian] = useState<'sim' | 'nao' | ''>('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState('')
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    if (!name.trim() || !isChristian) return
+    if (!name.trim() || !isChristian || isSubmitting) return
 
-    onSubmit({ name: name.trim(), phone, isChristian })
+    setSubmitError('')
+    setIsSubmitting(true)
+
+    try {
+      await onSubmit({ name: name.trim(), phone, isChristian })
+    } catch (error) {
+      setSubmitError(
+        error instanceof Error
+          ? error.message
+          : 'Não foi possível enviar seus dados. Tente novamente.',
+      )
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -109,9 +109,10 @@ function LeadForm({ onSubmit, buttonLabel = 'Continuar' }: LeadFormProps) {
 
       <button
         type="submit"
+        disabled={isSubmitting}
         className="group mt-10 inline-flex min-h-14 w-full items-center justify-between border border-fire bg-fire px-6 font-sans text-sm font-semibold uppercase tracking-[0.16em] text-[#17110f] transition-colors duration-300 hover:bg-transparent hover:text-fire focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-fire"
       >
-        {buttonLabel}
+        {isSubmitting ? 'Enviando...' : buttonLabel}
         <svg
           className="size-5 transition-transform duration-300 group-hover:translate-x-1"
           viewBox="0 0 24 24"
@@ -127,6 +128,16 @@ function LeadForm({ onSubmit, buttonLabel = 'Continuar' }: LeadFormProps) {
           />
         </svg>
       </button>
+
+      <p
+        className={`mt-4 font-sans text-sm text-[#e27e72] ${
+          submitError ? 'block' : 'hidden'
+        }`}
+        role="alert"
+        aria-live="polite"
+      >
+        {submitError}
+      </p>
 
       <p className="mt-5 font-sans text-xs font-light leading-relaxed text-cream/35">
         Seus dados serão utilizados apenas para esta experiência e comunicações

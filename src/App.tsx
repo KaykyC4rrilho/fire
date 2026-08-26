@@ -2,10 +2,15 @@ import { lazy, Suspense, useEffect, useState } from 'react'
 import Hero from './components/Hero'
 import LeadFormScreen from './components/LeadFormScreen'
 import Preloader from './components/Preloader'
+import { submitLead } from './lib/submissions'
+import type { LeadSource, LeadSubmissionData } from './types/lead'
 
 const PRELOADER_DURATION = 6000
 const TRANSITION_DURATION = 900
 const FireSphereSection = lazy(() => import('./components/FireSphereSection'))
+const AdminPortal = lazy(
+  () => import('./features/submissions/AdminPortal'),
+)
 
 const isConferenceEntry = () =>
   new URLSearchParams(window.location.search).get('conferencia') ===
@@ -17,15 +22,29 @@ const isParticipationEntry = () =>
 const shouldShowLeadForm = () =>
   isConferenceEntry() || isParticipationEntry()
 
+const getLeadSource = (): LeadSource =>
+  isConferenceEntry()
+    ? { origin: 'conference', conferenceSlug: 'sobretodaacarne' }
+    : { origin: 'participation', conferenceSlug: null }
+
+const isAdminEntry = () =>
+  window.location.pathname.replace(/\/+$/, '') === '/admin'
+
 function App() {
+  const isAdmin = isAdminEntry()
   const [hasEnteredExperience, setHasEnteredExperience] = useState(
     () => !shouldShowLeadForm(),
   )
   const [showPreloader, setShowPreloader] = useState(true)
   const [isTransitioning, setIsTransitioning] = useState(false)
 
+  const handleLeadContinue = async (data: LeadSubmissionData) => {
+    await submitLead(data)
+    setHasEnteredExperience(true)
+  }
+
   useEffect(() => {
-    if (!hasEnteredExperience) return
+    if (isAdmin || !hasEnteredExperience) return
 
     const transitionTimeout = window.setTimeout(() => {
       setIsTransitioning(true)
@@ -39,11 +58,22 @@ function App() {
       window.clearTimeout(transitionTimeout)
       window.clearTimeout(removeTimeout)
     }
-  }, [hasEnteredExperience])
+  }, [hasEnteredExperience, isAdmin])
+
+  if (isAdmin) {
+    return (
+      <Suspense fallback={<main className="min-h-[100svh] bg-black" />}>
+        <AdminPortal />
+      </Suspense>
+    )
+  }
 
   if (!hasEnteredExperience) {
     return (
-      <LeadFormScreen onContinue={() => setHasEnteredExperience(true)} />
+      <LeadFormScreen
+        source={getLeadSource()}
+        onContinue={handleLeadContinue}
+      />
     )
   }
 
