@@ -1,17 +1,51 @@
 ﻿import { type CSSProperties, useEffect, useRef, useState } from 'react'
 import { FireSphere } from './ui/fire-sphere'
 import { Parallax, ParallaxItem, PrallaxContainer } from './ui/parallax'
+import media1 from '../assets/firemidia/1.webp'
+import media2 from '../assets/firemidia/2.webp'
+import media3 from '../assets/firemidia/3.webp'
+import media4 from '../assets/firemidia/4.webp'
+import media5 from '../assets/firemidia/5.webp'
+import media6 from '../assets/firemidia/6.webp'
+import media7 from '../assets/firemidia/7.webp'
+import media8 from '../assets/firemidia/8.webp'
+import media9 from '../assets/firemidia/9.webp'
+import media10 from '../assets/firemidia/10.webp'
+import media12 from '../assets/firemidia/12.webp'
+import media13 from '../assets/firemidia/13.webp'
+import media14 from '../assets/firemidia/14.webp'
+import media15 from '../assets/firemidia/15.webp'
+import media16 from '../assets/firemidia/16.webp'
+import video1 from '../assets/firemidia/video1.webm'
+import video2 from '../assets/firemidia/video2.webm'
+import video3 from '../assets/firemidia/video3.webm'
 
 const revealBase =
   'transition-all duration-1000 ease-out motion-reduce:translate-y-0 motion-reduce:opacity-100'
 
-const parallaxPhotos = [
-  'https://images.unsplash.com/photo-1508849789987-4e5333c12b78?q=80&w=1593&auto=format&fit=crop&ixlib=rb-4.1.0',
-  'https://images.unsplash.com/photo-1666053691228-5f2c957b1755?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0',
-  'https://images.unsplash.com/photo-1705693346612-bbc9f38f1621?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0',
-  'https://images.unsplash.com/photo-1534270804882-6b5048b1c1fc?q=80&w=706&auto=format&fit=crop&ixlib=rb-4.1.0',
-  'https://images.unsplash.com/photo-1643451481461-f73ff49a3f93?q=80&w=688&auto=format&fit=crop&ixlib=rb-4.1.0',
+const parallaxMedia = [
+  { src: media1, type: 'image' },
+  { src: media2, type: 'image' },
+  { src: video1, type: 'video' },
+  { src: media3, type: 'image' },
+  { src: media4, type: 'image' },
+  { src: media5, type: 'image' },
+  { src: video2, type: 'video' },
+  { src: media6, type: 'image' },
+  { src: media7, type: 'image' },
+  { src: media8, type: 'image' },
+  { src: media9, type: 'image' },
+  { src: video3, type: 'video' },
+  { src: media10, type: 'image' },
+  { src: media12, type: 'image' },
+  { src: media13, type: 'image' },
+  { src: media14, type: 'image' },
+  { src: media15, type: 'image' },
+  { src: media16, type: 'image' },
 ]
+
+const parallaxStarts = [220, 520, 780, 440, 700, 320]
+const parallaxEnds = [-220, 20, 60, -80, 100, -140]
 
 function FireSphereSection() {
   const sectionRef = useRef<HTMLElement | null>(null)
@@ -141,67 +175,41 @@ function FireSphereSection() {
 
 
 
-  const mobileGrowProgress = clampProgress(
-    (scrollProgress - 0.9) / 0.1,
+  const fireConsumeProgress = clampProgress(
+    (scrollProgress - (isMobileViewport ? 0.05 : 0.12)) /
+      (isMobileViewport ? 0.9 : 0.8),
   )
 
-  const tabletGrowProgress = clampProgress(
-    (scrollProgress - 0.24) / 0.76,
-  )
-
-  const desktopGrowProgress = clampProgress(
-    (scrollProgress - 0.1) / 0.78,
-  )
-
-  const desktopFillProgress = clampProgress(
-    (scrollProgress - 0.42) / 0.44,
-  )
-
-  const mobileFillProgress = clampProgress(
-    (scrollProgress - 0.91) / 0.08,
-  )
-
-  const fireFillProgress = isMobileViewport
-    ? mobileFillProgress
-    : desktopFillProgress
-
-  const finalCoverProgress = clampProgress(
-    (scrollProgress - (isMobileViewport ? 0.985 : 0.92)) /
-      (isMobileViewport ? 0.015 : 0.08),
-  )
-
-  const fireScaleStyle = {
-    '--fire-scale-mobile':
-      2.15 + mobileGrowProgress * 8,
-
-    '--fire-scale-tablet':
-      1.7 + tabletGrowProgress * 5,
-
-    '--fire-scale-desktop':
-      1 + desktopGrowProgress * 5.4,
-
+  const fireTransitionStyle = {
     '--fire-opacity':
-      0.7 + fireFillProgress * 0.3,
+      0.82 + fireConsumeProgress * 0.18,
 
-    '--fire-final-cover':
-      finalCoverProgress,
-
-    '--fire-cover-radius': isMobileViewport
-      ? `${18 + mobileGrowProgress * 145}vmax`
-      : `${14 + desktopGrowProgress * 125}vmax`,
-
-    '--fire-cover-x':
-      isMobileViewport ? '50vw' : '73vw',
-
-    '--fire-cover-y':
-      isMobileViewport ? '78vh' : '50vh',
-
-    '--fire-cover-opacity':
-      fireFillProgress,
   } as CSSProperties
 
-  const fireFinished =
-    finalCoverProgress >= 0.999
+  const fireFinished = fireConsumeProgress >= 0.999
+
+  const sphereFadeProgress = clampProgress(
+    (fireConsumeProgress - 0.015) / 0.12,
+  )
+
+  const contentFadeProgress = clampProgress(
+    (fireConsumeProgress - 0.14) / 0.18,
+  )
+
+  const originalSphereStyle = {
+    '--fire-scale-mobile':
+      2.15,
+    '--fire-scale-tablet':
+      1.7,
+    '--fire-scale-desktop':
+      1,
+    '--fire-opacity':
+      0.7 * (1 - sphereFadeProgress),
+  } as CSSProperties
+
+  const contentFadeStyle = {
+    opacity: 1 - contentFadeProgress,
+  } as CSSProperties
 
   const showDefinition =
     fireFinished && parallaxProgress < 0.995
@@ -215,7 +223,7 @@ function FireSphereSection() {
         className="
           relative
           isolate
-          h-[360svh]
+          h-[240svh]
           overflow-clip
           bg-black
           text-cream
@@ -242,32 +250,29 @@ function FireSphereSection() {
             lg:py-20
           "
         >
-          <div
+          <FireSphere
             className="
               pointer-events-none
               absolute
-              inset-[-2px]
-              z-40
-              bg-fire
-              opacity-[var(--fire-cover-opacity)]
+              inset-0
+              z-30
+              size-full
+              opacity-[var(--fire-opacity)]
             "
-            style={{
-              ...fireScaleStyle,
-              clipPath:
-                'circle(var(--fire-cover-radius) at var(--fire-cover-x) var(--fire-cover-y))',
-            }}
-          />
-
-          <div
-            className="
-              pointer-events-none
-              absolute
-              inset-[-2px]
-              z-50
-              bg-fire
-              opacity-[var(--fire-final-cover)]
-            "
-            style={fireScaleStyle}
+            style={fireTransitionStyle}
+            bloomStrength={0}
+            bloomRadius={0}
+            bloomThreshold={0}
+            color0={[255, 122, 67]}
+            color1={[255, 122, 67]}
+            fillProgress={0}
+            canvasFillProgress={0}
+            consumeProgress={fireConsumeProgress}
+            showSphere={false}
+            maxPixelRatio={1.35}
+            antialias
+            segments={48}
+            animate
           />
 
           <div
@@ -285,6 +290,7 @@ function FireSphereSection() {
               lg:grid-cols-2
               lg:gap-8
             "
+            style={contentFadeStyle}
           >
             <article
               className="
@@ -372,7 +378,7 @@ function FireSphereSection() {
                 lg:min-h-[36rem]
                 lg:max-h-[52rem]
               "
-              style={fireScaleStyle}
+              style={originalSphereStyle}
             >
               <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-24 bg-gradient-to-b from-black to-transparent lg:hidden" />
 
@@ -402,14 +408,15 @@ function FireSphereSection() {
                   lg:w-[clamp(40rem,50vw,54rem)]
                   lg:scale-[var(--fire-scale-desktop)]
                 "
-                style={fireScaleStyle}
+                style={originalSphereStyle}
                 bloomStrength={0}
                 bloomRadius={0}
                 bloomThreshold={0}
                 color0={[255, 122, 67]}
                 color1={[255, 122, 67]}
-                fillProgress={fireFillProgress}
-                canvasFillProgress={fireFillProgress}
+                fillProgress={0}
+                canvasFillProgress={0}
+                consumeProgress={0}
                 maxPixelRatio={1.35}
                 antialias
                 segments={48}
@@ -510,13 +517,17 @@ function FireSphereSection() {
               flex
               flex-wrap
               justify-between
-              gap-4
+              gap-x-4
+              gap-y-48
               pb-[40vh]
+
+              md:gap-x-6
+              md:gap-y-64
             "
           >
-            {parallaxPhotos.map((src, index) => (
+            {parallaxMedia.map((media, index) => (
               <ParallaxItem
-                key={src}
+                key={media.src}
                 className="
                   group
                   relative
@@ -533,31 +544,30 @@ function FireSphereSection() {
                   md:h-[26rem]
                   md:w-[30%]
                 "
-                start={[220, 520, 780, 440, 700][index]}
-                end={[-220, 20, 60, -80, 100][index]}
+                start={parallaxStarts[index % parallaxStarts.length] ?? 220}
+                end={parallaxEnds[index % parallaxEnds.length] ?? -220}
               >
-                <img
-                  className="
-                    size-full
-                    object-cover
-                    object-center
-                    grayscale
-                    contrast-125
-                    mix-blend-multiply
+                {media.type === 'video' ? (
+                  <video
+                    className="size-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
+                    src={media.src}
+                    aria-hidden="true"
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    preload="metadata"
+                  />
+                ) : (
+                  <img
+                    className="size-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
+                    src={media.src}
+                    alt=""
+                    aria-hidden="true"
+                    loading="lazy"
+                  />
+                )}
 
-                    transition-transform
-                    duration-700
-
-                    group-hover:scale-105
-                  "
-                  src={src}
-                  alt=""
-                  aria-hidden="true"
-                  loading="lazy"
-                />
-
-                <div className="absolute inset-0 bg-fire/72 mix-blend-color" />
-                <div className="absolute inset-0 bg-charcoal/20" />
               </ParallaxItem>
             ))}
           </PrallaxContainer>
